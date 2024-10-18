@@ -39,7 +39,6 @@ function createGitDirectory() {
     path.join(process.cwd(), ".git", "HEAD"),
     "ref: refs/heads/main\n"
   );
-  console.log("Initialized git directory");
 }
 async function catFile(hash) {
   const filePath = path.join(
@@ -101,7 +100,7 @@ function createTree() {
 
       // Split the inflated data by null byte, filtering and handling only valid entries
       const entries = inflatedData.toString("utf-8").split("\x00");
-      
+
       let output = [];
       let restOfData = entries.slice(1);
 
@@ -120,10 +119,8 @@ function createTree() {
       // Join all filenames and output them
       const outputString = output.join("\n") + "\n";
       process.stdout.write(outputString);
-      
     } catch (error) {
       console.error("Error reading or processing the file:", error.message);
     }
   }
 }
-
