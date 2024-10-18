@@ -80,9 +80,12 @@ function createHash(file) {
 }
 
 function createTree() {
-  const flag = process.argv[2];
-  if (flag == "--name-only") {
-    const hash = process.argv[3];
+  const flag = process.argv[3];
+  if (flag === "--name-only") {
+    const hash = process.argv[4];
+    if (!hash) {
+      console.error("Hash not provided");
+    }
     const directory = hash.slice(0, 2);
     const fileName = hash.slice(2);
     const filePath = path.join(
