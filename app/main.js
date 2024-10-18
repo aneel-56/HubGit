@@ -81,7 +81,7 @@ function createHash(file) {
 
 function createTree() {
   const flag = process.argv[2];
-  if (flag === "--name-only") {
+  if (flag == "--name-only") {
     const hash = process.argv[3];
     const directory = hash.slice(0, 2);
     const fileName = hash.slice(2);
