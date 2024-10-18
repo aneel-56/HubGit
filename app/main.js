@@ -120,7 +120,7 @@ function createTree() {
       const outputString = output.join("\n") + "\n";
       process.stdout.write(outputString);
     } catch (error) {
-      console.error("Error reading or processing the file:", error.message);
+      throw new Error(error.message);
     }
   }
 }
