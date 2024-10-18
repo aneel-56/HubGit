@@ -81,7 +81,7 @@ function createHash(file) {
 
 function createTree() {
   const flag = process.argv[2];
-  // if (flag === "--name-only") {
+  if (flag === "--name-only") {
   const hash = process.argv[3];
   const directory = hash.slice(0, 2);
   const fileName = hash.slice(2);
@@ -97,7 +97,7 @@ function createTree() {
   const inflatedData = zlib.inflateSync(data);
   const entries = inflatedData.toString("utf-8").split("\x00");
   const dataFromTree = entries.slice(1);
-  console.log(dataFromTree);
+  // console.log(dataFromTree);
   const names = dataFromTree
     .filter((name) => name.includes(" "))
     .map((line) => line.split(" ")[1]);
@@ -106,5 +106,5 @@ function createTree() {
   const output = nameString.concat("\n");
   // console.log(nameString.concat("\n"));
   process.stdout.write(output.replace(/\n\n/g, "\n"));
-  // }
+  }
 }
