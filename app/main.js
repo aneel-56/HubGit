@@ -80,34 +80,41 @@ function createHash(file) {
 }
 
 function createTree() {
-  const flag = process.argv[3];
+  const flag = process.argv[3]; // --name-only
   if (flag === "--name-only") {
-    const hash = process.argv[4];
-    if (!hash) {
-      console.error("Hash not provided");
-    }
-    const directory = hash.slice(0, 2);
-    const fileName = hash.slice(2);
+    const hash = process.argv[4]; // The Git object hash
+    const directory = hash.slice(0, 2); // First 2 chars of hash
+    const fileName = hash.slice(2); // Remaining part of hash
     const filePath = path.join(
-      process.cwd(),
+      process.cwd(), // Get current directory
       ".git",
       "objects",
       directory,
       fileName
     );
 
-    const data = fs.readFileSync(filePath);
-    const inflatedData = zlib.inflateSync(data);
-    const entries = inflatedData.toString("utf-8").split("\x00");
-    const dataFromTree = entries.slice(1);
-    // console.log(dataFromTree);
-    const names = dataFromTree
-      .filter((name) => name.includes(" "))
-      .map((line) => line.split(" ")[1]);
-    // console.log(names);
-    const nameString = names.join("\n");
-    const output = nameString.concat("\n");
-    // console.log(nameString.concat("\n"));
-    process.stdout.write(output.replace(/\n\n/g, "\n"));
+    try {
+      // Read the compressed object file from .git/objects
+      const data = fs.readFileSync(filePath);
+      // Inflate (decompress) the file's contents
+      const inflatedData = zlib.inflateSync(data);
+      // Split the data by null byte
+      const entries = inflatedData.toString("utf-8").split("\x00");
+      const dataFromTree = entries.slice(1); // Tree data starts after first null byte
+
+      // Extract file/directory names (assuming a space separates mode, name, and hash)
+      const names = dataFromTree
+        .filter((name) => name.includes(" ")) // Only keep entries with a space
+        .map((line) => line.split(" ")[1]); // Get the name part (second element)
+
+      // Join names with newlines and add an extra newline at the end
+      const nameString = names.join("\n");
+      const output = nameString.concat("\n");
+
+      // Write the output, replacing any accidental double newlines with single ones
+      process.stdout.write(output.replace(/\n\n/g, "\n"));
+    } catch (error) {
+      console.error("Error reading or processing the file:", error.message);
+    }
   }
 }
