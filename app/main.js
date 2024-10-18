@@ -86,7 +86,7 @@ function createTree() {
     const directory = hash.slice(0, 2); // First 2 chars of hash
     const fileName = hash.slice(2); // Remaining part of hash
     const filePath = path.join(
-      process.cwd(), // Get current directory
+      process.cwd(),
       ".git",
       "objects",
       directory,
@@ -98,23 +98,32 @@ function createTree() {
       const data = fs.readFileSync(filePath);
       // Inflate (decompress) the file's contents
       const inflatedData = zlib.inflateSync(data);
-      // Split the data by null byte
+
+      // Split the inflated data by null byte, filtering and handling only valid entries
       const entries = inflatedData.toString("utf-8").split("\x00");
-      const dataFromTree = entries.slice(1); // Tree data starts after first null byte
+      
+      let output = [];
+      let restOfData = entries.slice(1);
 
-      // Extract file/directory names (assuming a space separates mode, name, and hash)
-      const names = dataFromTree
-        .filter((name) => name.includes(" ")) // Only keep entries with a space
-        .map((line) => line.split(" ")[1]); // Get the name part (second element)
+      for (let entry of restOfData) {
+        let spaceIdx = entry.indexOf(" ");
+        if (spaceIdx > 0) {
+          // Find the second space, where the filename starts
+          let fileNameIdx = entry.indexOf(" ", spaceIdx + 1);
+          if (fileNameIdx > 0) {
+            let fileName = entry.substring(fileNameIdx + 1).trim();
+            output.push(fileName);
+          }
+        }
+      }
 
-      // Join names with newlines and add an extra newline at the end
-      const nameString = names.join("\n");
-      const output = nameString.concat("\n");
-
-      // Write the output, replacing any accidental double newlines with single ones
-      process.stdout.write(output.replace(/\n\n/g, "\n"));
+      // Join all filenames and output them
+      const outputString = output.join("\n") + "\n";
+      process.stdout.write(outputString);
+      
     } catch (error) {
       console.error("Error reading or processing the file:", error.message);
     }
   }
 }
+
